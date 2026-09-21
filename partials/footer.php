@@ -1,0 +1,1 @@
+<div class="toast-wrap" id="toastWrap"></div><script src="<?=e($assetBase??'assets')?>/js/app.js"></script><?php if(!empty($pageScript)): ?><script src="<?=e($assetBase??'assets')?>/js/<?=e($pageScript)?>"></script><?php endif; ?></body></html>
