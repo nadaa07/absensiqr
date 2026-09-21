@@ -1,6 +1,6 @@
 <?php
 
-$host = "localhost";
+$host = "sql307.infinityfree.com";
 $dbname = "qr_absensi";
 $username = "if0_42975007";
 $password = "tUZIMe3AQa";
