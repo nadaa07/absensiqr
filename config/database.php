@@ -1,7 +1,7 @@
 <?php
 
 $host = "sql307.infinityfree.com";
-$dbname = "qr_absensi";
+$dbname = "if0_42975007_qr_absensi";
 $username = "if0_42975007";
 $password = "tUZIMe3AQa";
 
