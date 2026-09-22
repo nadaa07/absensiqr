@@ -743,197 +743,395 @@ document.addEventListener(
         );
 
 
+/* =====================================================
+   LOAD DATA LOKASI + SESI
+====================================================== */
 
-        /* =====================================================
-           LOAD DATA
-        ====================================================== */
+async function load() {
 
-        async function load() {
+    const locationSelect = $('#location');
+    const sessionSelect = $('#session');
 
-            try {
+    /* =================================================
+       LOAD LOKASI
+    ================================================= */
+
+    try {
+
+        locationSelect.innerHTML =
+            '<option value="">Memuat lokasi...</option>';
+
+        const locationResponse = await fetch(
+            '../api/data.php?action=locations',
+            {
+                method: 'GET',
+                cache: 'no-store'
+            }
+        );
+
+        console.log(
+            'LOCATION HTTP:',
+            locationResponse.status
+        );
+
+        if (!locationResponse.ok) {
+            throw new Error(
+                'HTTP lokasi ' + locationResponse.status
+            );
+        }
+
+        const locationJson =
+            await locationResponse.json();
+
+        console.log(
+            'LOCATION API:',
+            locationJson
+        );
+
+        if (
+            locationJson.ok === true &&
+            Array.isArray(locationJson.data)
+        ) {
+
+            window.absensiLocations =
+                locationJson.data;
+
+            locationSelect.innerHTML = '';
+
+            /* OPTION DEFAULT */
+
+            const defaultLocation =
+                document.createElement('option');
+
+            defaultLocation.value = '';
+            defaultLocation.textContent =
+                'Pilih lokasi';
+
+            locationSelect.appendChild(
+                defaultLocation
+            );
+
+            /* DATA LOKASI */
+
+            locationJson.data.forEach(function(location) {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = location.id;
+
+                option.textContent =
+                    String(location.nama_lokasi) +
+                    ' · radius ' +
+                    String(location.radius) +
+                    ' m';
+
+                locationSelect.appendChild(
+                    option
+                );
+
+            });
+
+            console.log(
+                'JUMLAH LOKASI:',
+                locationSelect.options.length
+            );
+
+        } else {
+
+            window.absensiLocations = [];
+
+            locationSelect.innerHTML =
+                '<option value="">Lokasi tidak tersedia</option>';
+
+            console.error(
+                'DATA LOKASI TIDAK VALID:',
+                locationJson
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            'ERROR LOAD LOKASI:',
+            error
+        );
+
+        window.absensiLocations = [];
+
+        locationSelect.innerHTML =
+            '<option value="">Gagal memuat lokasi</option>';
+
+    }
 
 
-                /* =========================
-                   LOKASI
-                ========================= */
 
-                const locationResponse =
-                    await fetch(
-                        '../api/data.php?action=locations'
+    /* =================================================
+       LOAD SESI AKTIF
+    ================================================= */
+
+    try {
+
+        sessionSelect.innerHTML =
+            '<option value="">Memuat sesi...</option>';
+
+        const sessionResponse = await fetch(
+            '../api/data.php?action=active_sessions',
+            {
+                method: 'GET',
+                cache: 'no-store'
+            }
+        );
+
+        console.log(
+            'SESSION HTTP:',
+            sessionResponse.status
+        );
+
+        if (!sessionResponse.ok) {
+
+            throw new Error(
+                'HTTP sesi ' +
+                sessionResponse.status
+            );
+
+        }
+
+        const sessionJson =
+            await sessionResponse.json();
+
+        console.log(
+            'SESSION API:',
+            sessionJson
+        );
+
+
+        /* =================================================
+           VALIDASI RESPONSE
+        ================================================= */
+
+        if (
+            sessionJson.ok !== true ||
+            !Array.isArray(sessionJson.data)
+        ) {
+
+            sessionSelect.innerHTML =
+                '<option value="">Tidak ada sesi aktif</option>';
+
+            console.error(
+                'FORMAT SESSION API SALAH:',
+                sessionJson
+            );
+
+            return;
+
+        }
+
+
+        /* =================================================
+           CEK DATA KOSONG
+        ================================================= */
+
+        if (sessionJson.data.length === 0) {
+
+            sessionSelect.innerHTML =
+                '<option value="">Tidak ada sesi aktif</option>';
+
+            console.warn(
+                'API sesi berhasil tetapi data kosong.'
+            );
+
+            return;
+
+        }
+
+
+        /* =================================================
+           URUTAN HARI
+        ================================================= */
+
+        const hariUrutan = {
+
+            'Senin': 1,
+            'Selasa': 2,
+            'Rabu': 3,
+            'Kamis': 4,
+            'Jumat': 5,
+            'Sabtu': 6,
+            'Minggu': 7
+
+        };
+
+
+        /* =================================================
+           SORT SESI
+        ================================================= */
+
+        const sessions =
+            [...sessionJson.data].sort(
+                function(a, b) {
+
+                    const hariA =
+                        hariUrutan[a.hari] ?? 99;
+
+                    const hariB =
+                        hariUrutan[b.hari] ?? 99;
+
+
+                    if (hariA !== hariB) {
+
+                        return hariA - hariB;
+
+                    }
+
+
+                    return String(
+                        a.jam_mulai || ''
+                    ).localeCompare(
+                        String(
+                            b.jam_mulai || ''
+                        )
                     );
 
-
-                const locationJson =
-                    await locationResponse.json();
-
-
-                if (
-                    locationJson.ok &&
-                    Array.isArray(locationJson.data)
-                ) {
-
-                    window.absensiLocations = locationJson.data;
-
-                    $('#location').innerHTML =
-                        '<option value="">Pilih lokasi</option>' +
-
-                        locationJson.data
-                            .map(location => `
-
-                                <option value="${location.id}">
-
-                                    ${escapeHtml(location.nama_lokasi)}
-
-                                    · radius
-                                    ${escapeHtml(location.radius)}
-                                    m
-
-                                </option>
-
-                            `)
-                            .join('');
-
-                } else {
-
-                    $('#location').innerHTML =
-                        '<option value="">Lokasi tidak tersedia</option>';
-
                 }
+            );
 
 
+        /* =================================================
+           KOSONGKAN SELECT
+        ================================================= */
 
-                /* =========================
-                   SESI
-                ========================= */
-
-                const sessionResponse =
-                    await fetch(
-                        '../api/data.php?action=active_sessions'
-                    );
+        sessionSelect.innerHTML = '';
 
 
-                const sessionJson =
-                    await sessionResponse.json();
+        /* =================================================
+           OPTION DEFAULT
+        ================================================= */
+
+        const defaultSession =
+            document.createElement('option');
+
+        defaultSession.value = '';
+        defaultSession.textContent =
+            'Pilih sesi';
+
+        sessionSelect.appendChild(
+            defaultSession
+        );
 
 
-                if (
-                    sessionJson.ok &&
-                    Array.isArray(sessionJson.data)
-                ) {
+        /* =================================================
+           MASUKKAN SEMUA SESI
+        ================================================= */
+
+        sessions.forEach(
+            function(session) {
+
+                const option =
+                    document.createElement('option');
 
 
-                    const hariUrutan = {
+                /* VALUE */
 
-                        'Senin': 1,
-                        'Selasa': 2,
-                        'Rabu': 3,
-                        'Kamis': 4,
-                        'Jumat': 5,
-                        'Sabtu': 6,
-                        'Minggu': 7
-
-                    };
+                option.value =
+                    String(session.id);
 
 
-                    const sessions =
-                        [...sessionJson.data]
-                            .sort(
-                                (a, b) => {
+                /* JAM */
 
-                                    const hariA =
-                                        hariUrutan[a.hari] ?? 99;
+                const mulai =
+                    String(
+                        session.jam_mulai || ''
+                    ).substring(0, 5);
 
-                                    const hariB =
-                                        hariUrutan[b.hari] ?? 99;
-
-
-                                    if (
-                                        hariA !== hariB
-                                    ) {
-
-                                        return hariA - hariB;
-
-                                    }
+                const selesai =
+                    String(
+                        session.jam_selesai || ''
+                    ).substring(0, 5);
 
 
-                                    return String(
-                                        a.jam_mulai
-                                    ).localeCompare(
-                                        String(
-                                            b.jam_mulai
-                                        )
-                                    );
+                /* TEXT */
 
-                                }
-                            );
-
-
-                    $('#session').innerHTML =
-                        '<option value="">Pilih sesi</option>' +
-
-                        sessions
-                            .map(session => {
-
-                                const mulai =
-                                    String(
-                                        session.jam_mulai
-                                    ).slice(0, 5);
+                option.textContent =
+                    String(
+                        session.nama_mk || 'Mata Kuliah'
+                    ) +
+                    ' · ' +
+                    String(
+                        session.nama_kelas || 'Kelas'
+                    ) +
+                    ' · ' +
+                    String(
+                        session.hari || '-'
+                    ) +
+                    ' · ' +
+                    mulai +
+                    '–' +
+                    selesai;
 
 
-                                const selesai =
-                                    String(
-                                        session.jam_selesai
-                                    ).slice(0, 5);
+                /* TAMBAHKAN */
 
-
-                                return `
-
-                                    <option value="${session.id}">
-
-                                        ${escapeHtml(session.nama_mk)}
-                                        ·
-                                        ${escapeHtml(session.nama_kelas)}
-                                        ·
-                                        ${escapeHtml(session.hari)}
-                                        ·
-                                        ${mulai}–${selesai}
-
-                                    </option>
-
-                                `;
-
-                            })
-                            .join('');
-
-                } else {
-
-                    $('#session').innerHTML =
-                        '<option value="">Tidak ada sesi aktif</option>';
-
-                }
-
-
-            } catch (error) {
-
-                console.error(error);
-
-
-                $('#location').innerHTML =
-                    '<option value="">Gagal memuat lokasi</option>';
-
-
-                $('#session').innerHTML =
-                    '<option value="">Gagal memuat sesi</option>';
-
-
-                toast(
-                    'Data lokasi atau jadwal belum dapat dimuat.',
-                    'error'
+                sessionSelect.appendChild(
+                    option
                 );
 
             }
+        );
 
-        }
+
+        /* =================================================
+           HASIL AKHIR
+        ================================================= */
+
+        console.log(
+            'JUMLAH OPTION SESI:',
+            sessionSelect.options.length
+        );
+
+
+        console.log(
+            'DAFTAR SESI:',
+            Array.from(
+                sessionSelect.options
+            ).map(function(option) {
+
+                return {
+                    value: option.value,
+                    text: option.textContent.trim()
+                };
+
+            })
+        );
+
+
+        /* =================================================
+           PASTIKAN SELECT TIDAK DISABLED
+        ================================================= */
+
+        sessionSelect.disabled = false;
+
+
+        /* =================================================
+           UPDATE TOMBOL
+        ================================================= */
+
+        updateSubmitState();
+
+    } catch (error) {
+
+        console.error(
+            'ERROR LOAD SESI:',
+            error
+        );
+
+        sessionSelect.innerHTML =
+            '<option value="">Gagal memuat sesi</option>';
+
+    }
+
+}
 
 
 
@@ -1327,6 +1525,12 @@ document.addEventListener(
 
                         $('#session').value =
                             json.data.id;
+
+                            $('#session').dispatchEvent(
+    new Event('change')
+);
+
+updateSubmitState();
 
 
                         $('#identityStatus')
