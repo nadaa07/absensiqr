@@ -743,395 +743,197 @@ document.addEventListener(
         );
 
 
-/* =====================================================
-   LOAD DATA LOKASI + SESI
-====================================================== */
 
-async function load() {
+        /* =====================================================
+           LOAD DATA
+        ====================================================== */
 
-    const locationSelect = $('#location');
-    const sessionSelect = $('#session');
+        async function load() {
 
-    /* =================================================
-       LOAD LOKASI
-    ================================================= */
+            try {
 
-    try {
 
-        locationSelect.innerHTML =
-            '<option value="">Memuat lokasi...</option>';
+                /* =========================
+                   LOKASI
+                ========================= */
 
-        const locationResponse = await fetch(
-            '../api/data.php?action=locations',
-            {
-                method: 'GET',
-                cache: 'no-store'
-            }
-        );
-
-        console.log(
-            'LOCATION HTTP:',
-            locationResponse.status
-        );
-
-        if (!locationResponse.ok) {
-            throw new Error(
-                'HTTP lokasi ' + locationResponse.status
-            );
-        }
-
-        const locationJson =
-            await locationResponse.json();
-
-        console.log(
-            'LOCATION API:',
-            locationJson
-        );
-
-        if (
-            locationJson.ok === true &&
-            Array.isArray(locationJson.data)
-        ) {
-
-            window.absensiLocations =
-                locationJson.data;
-
-            locationSelect.innerHTML = '';
-
-            /* OPTION DEFAULT */
-
-            const defaultLocation =
-                document.createElement('option');
-
-            defaultLocation.value = '';
-            defaultLocation.textContent =
-                'Pilih lokasi';
-
-            locationSelect.appendChild(
-                defaultLocation
-            );
-
-            /* DATA LOKASI */
-
-            locationJson.data.forEach(function(location) {
-
-                const option =
-                    document.createElement('option');
-
-                option.value = location.id;
-
-                option.textContent =
-                    String(location.nama_lokasi) +
-                    ' · radius ' +
-                    String(location.radius) +
-                    ' m';
-
-                locationSelect.appendChild(
-                    option
-                );
-
-            });
-
-            console.log(
-                'JUMLAH LOKASI:',
-                locationSelect.options.length
-            );
-
-        } else {
-
-            window.absensiLocations = [];
-
-            locationSelect.innerHTML =
-                '<option value="">Lokasi tidak tersedia</option>';
-
-            console.error(
-                'DATA LOKASI TIDAK VALID:',
-                locationJson
-            );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            'ERROR LOAD LOKASI:',
-            error
-        );
-
-        window.absensiLocations = [];
-
-        locationSelect.innerHTML =
-            '<option value="">Gagal memuat lokasi</option>';
-
-    }
-
-
-
-    /* =================================================
-       LOAD SESI AKTIF
-    ================================================= */
-
-    try {
-
-        sessionSelect.innerHTML =
-            '<option value="">Memuat sesi...</option>';
-
-        const sessionResponse = await fetch(
-            '../api/data.php?action=active_sessions',
-            {
-                method: 'GET',
-                cache: 'no-store'
-            }
-        );
-
-        console.log(
-            'SESSION HTTP:',
-            sessionResponse.status
-        );
-
-        if (!sessionResponse.ok) {
-
-            throw new Error(
-                'HTTP sesi ' +
-                sessionResponse.status
-            );
-
-        }
-
-        const sessionJson =
-            await sessionResponse.json();
-
-        console.log(
-            'SESSION API:',
-            sessionJson
-        );
-
-
-        /* =================================================
-           VALIDASI RESPONSE
-        ================================================= */
-
-        if (
-            sessionJson.ok !== true ||
-            !Array.isArray(sessionJson.data)
-        ) {
-
-            sessionSelect.innerHTML =
-                '<option value="">Tidak ada sesi aktif</option>';
-
-            console.error(
-                'FORMAT SESSION API SALAH:',
-                sessionJson
-            );
-
-            return;
-
-        }
-
-
-        /* =================================================
-           CEK DATA KOSONG
-        ================================================= */
-
-        if (sessionJson.data.length === 0) {
-
-            sessionSelect.innerHTML =
-                '<option value="">Tidak ada sesi aktif</option>';
-
-            console.warn(
-                'API sesi berhasil tetapi data kosong.'
-            );
-
-            return;
-
-        }
-
-
-        /* =================================================
-           URUTAN HARI
-        ================================================= */
-
-        const hariUrutan = {
-
-            'Senin': 1,
-            'Selasa': 2,
-            'Rabu': 3,
-            'Kamis': 4,
-            'Jumat': 5,
-            'Sabtu': 6,
-            'Minggu': 7
-
-        };
-
-
-        /* =================================================
-           SORT SESI
-        ================================================= */
-
-        const sessions =
-            [...sessionJson.data].sort(
-                function(a, b) {
-
-                    const hariA =
-                        hariUrutan[a.hari] ?? 99;
-
-                    const hariB =
-                        hariUrutan[b.hari] ?? 99;
-
-
-                    if (hariA !== hariB) {
-
-                        return hariA - hariB;
-
-                    }
-
-
-                    return String(
-                        a.jam_mulai || ''
-                    ).localeCompare(
-                        String(
-                            b.jam_mulai || ''
-                        )
+                const locationResponse =
+                    await fetch(
+                        '../api/data.php?action=locations'
                     );
 
+
+                const locationJson =
+                    await locationResponse.json();
+
+
+                if (
+                    locationJson.ok &&
+                    Array.isArray(locationJson.data)
+                ) {
+
+                    window.absensiLocations = locationJson.data;
+
+                    $('#location').innerHTML =
+                        '<option value="">Pilih lokasi</option>' +
+
+                        locationJson.data
+                            .map(location => `
+
+                                <option value="${location.id}">
+
+                                    ${escapeHtml(location.nama_lokasi)}
+
+                                    · radius
+                                    ${escapeHtml(location.radius)}
+                                    m
+
+                                </option>
+
+                            `)
+                            .join('');
+
+                } else {
+
+                    $('#location').innerHTML =
+                        '<option value="">Lokasi tidak tersedia</option>';
+
                 }
-            );
 
 
-        /* =================================================
-           KOSONGKAN SELECT
-        ================================================= */
 
-        sessionSelect.innerHTML = '';
+                /* =========================
+                   SESI
+                ========================= */
 
-
-        /* =================================================
-           OPTION DEFAULT
-        ================================================= */
-
-        const defaultSession =
-            document.createElement('option');
-
-        defaultSession.value = '';
-        defaultSession.textContent =
-            'Pilih sesi';
-
-        sessionSelect.appendChild(
-            defaultSession
-        );
+                const sessionResponse =
+                    await fetch(
+                        '../api/data.php?action=active_sessions'
+                    );
 
 
-        /* =================================================
-           MASUKKAN SEMUA SESI
-        ================================================= */
-
-        sessions.forEach(
-            function(session) {
-
-                const option =
-                    document.createElement('option');
+                const sessionJson =
+                    await sessionResponse.json();
 
 
-                /* VALUE */
-
-                option.value =
-                    String(session.id);
-
-
-                /* JAM */
-
-                const mulai =
-                    String(
-                        session.jam_mulai || ''
-                    ).substring(0, 5);
-
-                const selesai =
-                    String(
-                        session.jam_selesai || ''
-                    ).substring(0, 5);
+                if (
+                    sessionJson.ok &&
+                    Array.isArray(sessionJson.data)
+                ) {
 
 
-                /* TEXT */
+                    const hariUrutan = {
 
-                option.textContent =
-                    String(
-                        session.nama_mk || 'Mata Kuliah'
-                    ) +
-                    ' · ' +
-                    String(
-                        session.nama_kelas || 'Kelas'
-                    ) +
-                    ' · ' +
-                    String(
-                        session.hari || '-'
-                    ) +
-                    ' · ' +
-                    mulai +
-                    '–' +
-                    selesai;
+                        'Senin': 1,
+                        'Selasa': 2,
+                        'Rabu': 3,
+                        'Kamis': 4,
+                        'Jumat': 5,
+                        'Sabtu': 6,
+                        'Minggu': 7
+
+                    };
 
 
-                /* TAMBAHKAN */
+                    const sessions =
+                        [...sessionJson.data]
+                            .sort(
+                                (a, b) => {
 
-                sessionSelect.appendChild(
-                    option
+                                    const hariA =
+                                        hariUrutan[a.hari] ?? 99;
+
+                                    const hariB =
+                                        hariUrutan[b.hari] ?? 99;
+
+
+                                    if (
+                                        hariA !== hariB
+                                    ) {
+
+                                        return hariA - hariB;
+
+                                    }
+
+
+                                    return String(
+                                        a.jam_mulai
+                                    ).localeCompare(
+                                        String(
+                                            b.jam_mulai
+                                        )
+                                    );
+
+                                }
+                            );
+
+
+                    $('#session').innerHTML =
+                        '<option value="">Pilih sesi</option>' +
+
+                        sessions
+                            .map(session => {
+
+                                const mulai =
+                                    String(
+                                        session.jam_mulai
+                                    ).slice(0, 5);
+
+
+                                const selesai =
+                                    String(
+                                        session.jam_selesai
+                                    ).slice(0, 5);
+
+
+                                return `
+
+                                    <option value="${session.id}">
+
+                                        ${escapeHtml(session.nama_mk)}
+                                        ·
+                                        ${escapeHtml(session.nama_kelas)}
+                                        ·
+                                        ${escapeHtml(session.hari)}
+                                        ·
+                                        ${mulai}–${selesai}
+
+                                    </option>
+
+                                `;
+
+                            })
+                            .join('');
+
+                } else {
+
+                    $('#session').innerHTML =
+                        '<option value="">Tidak ada sesi aktif</option>';
+
+                }
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                $('#location').innerHTML =
+                    '<option value="">Gagal memuat lokasi</option>';
+
+
+                $('#session').innerHTML =
+                    '<option value="">Gagal memuat sesi</option>';
+
+
+                toast(
+                    'Data lokasi atau jadwal belum dapat dimuat.',
+                    'error'
                 );
 
             }
-        );
 
-
-        /* =================================================
-           HASIL AKHIR
-        ================================================= */
-
-        console.log(
-            'JUMLAH OPTION SESI:',
-            sessionSelect.options.length
-        );
-
-
-        console.log(
-            'DAFTAR SESI:',
-            Array.from(
-                sessionSelect.options
-            ).map(function(option) {
-
-                return {
-                    value: option.value,
-                    text: option.textContent.trim()
-                };
-
-            })
-        );
-
-
-        /* =================================================
-           PASTIKAN SELECT TIDAK DISABLED
-        ================================================= */
-
-        sessionSelect.disabled = false;
-
-
-        /* =================================================
-           UPDATE TOMBOL
-        ================================================= */
-
-        updateSubmitState();
-
-    } catch (error) {
-
-        console.error(
-            'ERROR LOAD SESI:',
-            error
-        );
-
-        sessionSelect.innerHTML =
-            '<option value="">Gagal memuat sesi</option>';
-
-    }
-
-}
+        }
 
 
 
@@ -1526,12 +1328,6 @@ async function load() {
                         $('#session').value =
                             json.data.id;
 
-                            $('#session').dispatchEvent(
-    new Event('change')
-);
-
-updateSubmitState();
-
 
                         $('#identityStatus')
                             .textContent =
@@ -1737,49 +1533,68 @@ updateSubmitState();
                     scanner = new Html5Qrcode('qr-reader');
 
                     /*
-                     * Kamera dibuat lebih kompatibel untuk laptop/HP.
-                     * Jangan memaksa aspectRatio atau facingMode=environment
-                     * karena webcam laptop sering tidak memiliki kamera
-                     * yang memenuhi constraint tersebut.
+                     * SCANNER COMPATIBILITY
+                     *
+                     * Di hosting, kamera bisa terbuka tetapi decoder tidak
+                     * selalu stabil jika cameraId digabung dengan
+                     * videoConstraints/facingMode sekaligus.
+                     *
+                     * Karena itu: pilih kamera belakang jika tersedia, lalu
+                     * gunakan cameraId tersebut secara langsung. Jika daftar
+                     * kamera tidak tersedia, fallback ke facingMode environment.
                      */
-                    let cameraConfig = null;
+                    let cameraConfig = {
+                        facingMode: { ideal: 'environment' }
+                    };
 
                     try {
                         const cameras = await Html5Qrcode.getCameras();
-                        if (Array.isArray(cameras) && cameras.length) {
+
+                        if (Array.isArray(cameras) && cameras.length > 0) {
                             const preferred = cameras.find(camera =>
-                                /back|rear|environment|belakang/i.test(String(camera.label || ''))
+                                /back|rear|environment|belakang/i.test(
+                                    String(camera.label || '')
+                                )
                             );
-                            cameraConfig = preferred ? preferred.id : cameras[0].id;
+
+                            cameraConfig = preferred
+                                ? preferred.id
+                                : cameras[0].id;
                         }
                     } catch (cameraListError) {
-                        console.warn('Daftar kamera tidak dapat dibaca:', cameraListError);
-                    }
-
-                    if (!cameraConfig) {
-                        cameraConfig = { facingMode: { ideal: 'environment' } };
+                        console.warn(
+                            'Daftar kamera tidak dapat dibaca, memakai kamera default:',
+                            cameraListError
+                        );
                     }
 
                     await scanner.start(
                         cameraConfig,
                         {
-                            fps: 10,
+                            fps: 12,
+
+                            // QR area dibuat besar agar QR tetap mudah terbaca
+                            // di kamera HP maupun laptop.
                             qrbox: function(viewfinderWidth, viewfinderHeight) {
-                                const size = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.82);
-                                return { width: size, height: size };
+                                const size = Math.floor(
+                                    Math.min(viewfinderWidth, viewfinderHeight) * 0.80
+                                );
+
+                                return {
+                                    width: size,
+                                    height: size
+                                };
                             },
+
                             aspectRatio: 1,
-                            disableFlip: false,
-                            videoConstraints: {
-                                width: { ideal: 1280 },
-                                height: { ideal: 720 },
-                                facingMode: { ideal: 'environment' }
-                            }
+                            disableFlip: false
                         },
                         function(decodedText) {
                             onScan(decodedText);
                         },
-                        function() {}
+                        function() {
+                            // QR belum ditemukan. Scanner tetap berjalan.
+                        }
                     );
 
                     cameraRunning = true;
