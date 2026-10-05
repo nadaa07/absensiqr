@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta
+            name="description"
+            content="Pratinjau tampilan Sistem Absensi QR untuk presensi digital kampus."
+        >
+        <meta name="theme-color" content="#10071c">
+        <title>Presensi Digital · Sistem Absensi QR</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" href="assets/css/style.css">
+    </head>
+    <body>
+        <div class="public-shell">
+            <header class="public-top">
+                <a class="brand" href="#beranda">
+                    <span class="brand-mark" aria-hidden="true">✦</span>
+                    <span>
+                        <b>Sistem Absensi QR</b>
+                        <small>Presensi Digital · Kampus Lebih Modern</small>
+                    </span>
+                </a>
+
+                <div class="top-date">
+                    <b>GitHub Pages</b>
+                    Pratinjau tampilan website
+                </div>
+            </header>
+
+            <main id="beranda">
+                <section class="hero">
+                    <div class="hero-copy">
+                        <span class="eyebrow">Digital Attendance System</span>
+                        <h1>Presensi lebih <em>sederhana.</em></h1>
+                        <p>
+                            Satu pintu untuk scan QR, validasi lokasi, waktu
+                            perkuliahan, dan identitas mahasiswa. Dibuat supaya
+                            absensi tidak berubah menjadi ritual berburu tombol
+                            yang hilang.
+                        </p>
+
+                        <div class="feature-row">
+                            <div class="feature">
+                                <span class="ico" aria-hidden="true">⌁</span>
+                                <span>
+                                    <b>QR Code</b>
+                                    <small>Cepat &amp; Akurat</small>
+                                </span>
+                            </div>
+                            <div class="feature">
+                                <span class="ico" aria-hidden="true">⌖</span>
+                                <span>
+                                    <b>Validasi Lokasi</b>
+                                    <small>Sesuai Area Kampus</small>
+                                </span>
+                            </div>
+                            <div class="feature">
+                                <span class="ico" aria-hidden="true">◷</span>
+                                <span>
+                                    <b>Validasi Waktu</b>
+                                    <small>Real-time</small>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <a class="btn btn-primary" href="#cara">
+                                Lihat alur presensi ↗
+                            </a>
+                            <a class="btn btn-ghost" href="#batasan">
+                                Tentang pratinjau
+                            </a>
+                        </div>
+                    </div>
+
+                    <section class="auth-card" aria-labelledby="scanner-title">
+                        <span class="eyebrow">Student Access</span>
+                        <h2 id="scanner-title">Scan QR</h2>
+                        <p>
+                            Pratinjau halaman pemindai QR untuk mengenali
+                            identitas mahasiswa.
+                        </p>
+
+                        <div class="scanner-stage" aria-hidden="true">
+                            <div class="scan-corners">
+                                <div class="scan-line"></div>
+                            </div>
+                        </div>
+
+                        <div class="scanner-actions">
+                            <a class="btn btn-primary" href="#cara">
+                                Lihat alur presensi
+                            </a>
+                            <a class="btn btn-ghost" href="#batasan">
+                                Info demo
+                            </a>
+                        </div>
+                        <div class="helper">
+                            Login dan pemindai sungguhan tersedia pada aplikasi
+                            PHP, bukan pratinjau GitHub Pages ini.
+                        </div>
+                    </section>
+                </section>
+
+                <section id="cara" class="glass" style="margin-top: 20px">
+                    <div class="section-head">
+                        <h2>Alur sistem</h2>
+                        <span>01 — 04</span>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <small>01</small>
+                            <strong>Scan</strong>
+                            <span>QR kartu mahasiswa atau QR sesi.</span>
+                        </div>
+                        <div class="stat">
+                            <small>02</small>
+                            <strong>Kenali</strong>
+                            <span>Sistem menemukan identitas dan sesi aktif.</span>
+                        </div>
+                        <div class="stat">
+                            <small>03</small>
+                            <strong>Validasi</strong>
+                            <span>Lokasi dan waktu diperiksa server.</span>
+                        </div>
+                        <div class="stat">
+                            <small>04</small>
+                            <strong>Simpan</strong>
+                            <span>Status hadir langsung masuk laporan.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section
+                    id="batasan"
+                    class="glass"
+                    style="margin-top: 20px"
+                    aria-labelledby="preview-title"
+                >
+                    <div class="section-head">
+                        <h2 id="preview-title">Tentang pratinjau ini</h2>
+                    </div>
+                    <p>
+                        GitHub Pages hanya menyajikan file statis. Halaman ini
+                        menampilkan desain website, sedangkan login, database,
+                        pemindai QR, dan validasi presensi membutuhkan server
+                        PHP yang tersedia pada hosting aplikasi.
+                    </p>
+                </section>
+            </main>
+        </div>
+    </body>
+</html>

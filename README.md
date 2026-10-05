@@ -20,6 +20,18 @@ Versi ini dibuat ulang dengan satu bahasa visual, struktur PHP Native + MySQL, Q
 4. Pastikan `config/database.php` sesuai username/password MySQL.
 5. Buka `http://localhost/absen_qr/`.
 
+## Pratinjau tampilan di GitHub Pages
+GitHub Pages hanya menjalankan file statis, bukan PHP atau MySQL. Workflow
+`.github/workflows/pages.yml` menerbitkan halaman pratinjau dari
+`github-pages/index.html` bersama stylesheet yang digunakan situs. Login,
+database, pemindai QR, dan validasi absensi tetap memerlukan hosting PHP.
+
+Untuk mengaktifkan publikasi:
+1. Buka **Settings → Pages** pada repository.
+2. Pada **Build and deployment**, pilih **GitHub Actions** sebagai source.
+3. Push perubahan ke branch `main`, atau jalankan workflow **Deploy static preview to GitHub Pages** secara manual.
+4. Setelah workflow berhasil, buka URL Pages yang ditampilkan pada bagian **Settings → Pages**.
+
 ## Akun demo
 - Admin: `admin` / `123456`
 - Dosen: `NIDN-JS-001` / `123456`
